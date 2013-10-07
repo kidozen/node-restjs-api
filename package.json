@@ -1,0 +1,27 @@
+{
+  "name": "restjs-api",
+  "version": "0.0.1",
+  "description": "Kidozen's connector to invoke REST services",
+  "main": "index.js",
+  "scripts": {
+    "test": "mocha -R spec"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/kidozen/node-restjs-api.git"
+  },
+  "keywords": [
+    "kidozen",
+    "connector",
+    "rest"
+  ],
+  "author": "Silvio Massari",
+  "license": "BSD",
+  "dependencies": {
+    "winston": "0.6.2",
+    "request":"2.12.0"
+  },
+  "devDependencies": {
+    "mocha": "*"
+  }
+}
