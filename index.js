@@ -1,6 +1,6 @@
-var request = require("request"),
-    configProperties = [
-        "qs", "headers", "body", "followRedirect",
+var request = require("request");
+var configProperties = [
+        "qs", "body", "followRedirect",
         "followAllRedirects", "maxRedirects", "encoding", 
         "timeout", "proxy", "jar", "auth", "oauth", "aws"
     ];
@@ -10,7 +10,8 @@ module.exports = function(config){
     // Validates arguments
     if (typeof config !== 'object') throw Error("'config' argument must be an object instance.");
     if (!config.endpoint) throw Error("'endpoint' property is missing.");
-    
+    if (config.headers && typeof config.headers!=='object') throw Error("'headers' property is invalid.");
+
     // variables
     var self = this;
     this.config = config;
@@ -78,14 +79,18 @@ module.exports = function(config){
         
         if (typeof cb !== 'function') throw new Error("Callback argument must be a function.");
         if (typeof options !== 'object') return cb(new Error("'options' argument must be an object instance."));
-        
+        if (options.headers && typeof options.headers!=='object') cb(Error("'options.headers' property is invalid."));
+
         // Set the options that will be used in the request.
         // The set of options will be the result of merging globalConfig and options.
         var optionsToUse = {};
-        configProperties.forEach(function(prop){
+        configProperties.forEach(function (prop) {
             if (prop in options) optionsToUse[prop] = options[prop];
             else if (prop in self.config) optionsToUse[prop] = self.config[prop];
         });
+
+        // set default headers
+        optionsToUse.headers = merge(options.headers, self.config.headers);
 
         // set required options
         optionsToUse.method = options.method || "GET";
@@ -127,6 +132,24 @@ module.exports = function(config){
             }
         }
         return null;
+    };
+
+    // Merges two objects. Properties from object 'a' prevail over properties from object 'b'. 
+    var merge = function (a, b) {
+
+        var result = {};
+        var propsA = Object
+            .keys(a || {})
+            .forEach(function (propA) { result[propA] = a[propA]; });
+
+        Object
+            .keys(b || {})
+            .filter(function (propB) { return !(propB in result); })
+            .forEach(function (propB) { 
+                result[propB] = b[propB];
+            });
+
+        return result;
     };
 };
 

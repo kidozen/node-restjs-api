@@ -35,6 +35,7 @@ function callback (err, data) {
 
 The module exports a class and its constructor requires a configuration object with following property:
 * `endpoint`: Required string. URL to the service.
+* `headers`: Optional object containing http headers, defaults to {}.
 
 ```
 var Rest = require("restjs-api");

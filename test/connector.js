@@ -1,11 +1,26 @@
-var assert = require('assert');
+var assert  = require('assert');
+var http    = require('http');
         
 describe('Rest connector:', function(){
 
     var Connector = require('../index.js');
-    var config = {
+    var server = null;
+    var config = null;
+
+    beforeEach(function() { 
+        config = {
             endpoint: 'http://localhost:9615'
         };
+    });
+
+    afterEach(function(done) {
+        if (server) {
+            server.close(done);
+            server = null;
+        } else {
+            done();
+        }
+    });
 
     it('Can be created', function(){
         assert.ok(Connector);
@@ -46,8 +61,8 @@ describe('Rest connector:', function(){
     });
 
     it('should make HTTP requests', function (done) {
-        var http = require('http');
-        http.createServer(function (req, res) {
+
+        server = http.createServer(function (req, res) {
             assert.equal('GET', req.method);
             assert.equal('/foo', req.url);
             res.writeHead(200, { 'Content-Type': 'text/plain' });
@@ -62,6 +77,49 @@ describe('Rest connector:', function(){
             assert.equal('text/plain', result.headers['content-type']);
             assert.equal('Hello World', result.body);
             done();
+        });
+    });
+
+    describe ("headers", function() {
+        it('should use headers from configuration', function (done) {
+
+            server = http.createServer(function (req, res) {
+                assert.equal("bar", req.headers.foo)
+                res.end();
+            }).listen(9615);
+            
+            config.headers =  { foo: "bar" };
+            var instance = new Connector(config);
+            instance.exec({ method:'get', path: '/foo' }, function() {
+                done();            
+            });
+        });
+
+        it('should use headers from request', function (done) {
+
+            server = http.createServer(function (req, res) {
+                assert.equal("bar", req.headers.foo)
+                res.end();
+            }).listen(9615);
+            
+            var instance = new Connector(config);
+            instance.exec({ method:'get', path: '/foo', headers: { foo: "bar" }}, function() {
+                done();            
+            });
+        });
+
+        it('headers from request should override headers from configuration', function (done) {
+
+            server = http.createServer(function (req, res) {
+                assert.equal("ok", req.headers.foo)
+                res.end();
+            }).listen(9615);
+            
+            config.headers =  { foo: "fail" };
+            var instance = new Connector(config);
+            instance.exec({ method:'get', path: '/foo', headers: { foo: "ok" }}, function() {
+                done();            
+            });
         });
     });
 });
