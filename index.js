@@ -59,6 +59,7 @@ module.exports = function(config){
      *       jar                 - Set to false if you don't want cookies to be remembered for future use or define your custom cookie jar 
      *       auth                - A hash containing user, password and sendImmediately. See documentation at https://github.com/mikeal/request#http-authentication 
      *       oauth               - Options for OAuth HMAC-SHA1 signing, see documentation at https://github.com/mikeal/request#oauth-signing
+     *       stream              - A boolean that specifies if the response ust be a stream.
      *       aws                 - Object containing aws signing information, should have the properties key and secret as well as bucket 
      *                             unless you're specifying your bucket as part of the path, or you are making a request that doesn't use a bucket 
      * 
@@ -98,15 +99,14 @@ module.exports = function(config){
 
         // send request and wait for its response
         request(optionsToUse, function(error, response) {
-            var result = null;
-            if (response) {
-                result = {
+            
+            if (options.stream) return cb(error, response);
+            
+            cb(error, response ? {
                     status: response.statusCode,
                     headers: response.headers,
                     body: tryParseBodyAsJson(response)
-                };
-            }
-            cb(error, result);
+                } : null );
         });
     };
 

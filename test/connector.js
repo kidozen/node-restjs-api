@@ -1,5 +1,6 @@
 var assert  = require('assert');
 var http    = require('http');
+var Stream  = require('stream');
         
 describe('Rest connector:', function(){
 
@@ -77,6 +78,24 @@ describe('Rest connector:', function(){
             assert.equal('text/plain', result.headers['content-type']);
             assert.equal('Hello World', result.body);
             done();
+        });
+    });
+
+    it("'stream' option must work", function (done) {
+
+        server = http.createServer(function (req, res) {
+            res.setHeader("x-foo", "bar");
+            res.statusCode = 201;
+            res.end();
+        }).listen(9615);
+        
+        var instance = new Connector(config);
+        instance.exec({ method:'get', path: '/foo', stream: true}, function(err, result) {
+            assert.ok(!err);
+            assert.ok(result instanceof Stream);
+            assert.equal("bar", result.headers["x-foo"]);
+            assert.equal(201, result.statusCode);
+            done();            
         });
     });
 
