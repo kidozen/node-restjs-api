@@ -97,17 +97,22 @@ module.exports = function(config){
         optionsToUse.method = options.method || "GET";
         optionsToUse.url = self.config.endpoint + (options.path || "");
 
-        // send request and wait for its response
-        request(optionsToUse, function(error, response) {
+        if (options.stream) {
             
-            if (options.stream) return cb(error, response);
+            // send request and pipe the response
+            cb(null, request(optionsToUse));
+
+        } else {
             
-            cb(error, response ? {
-                    status: response.statusCode,
-                    headers: response.headers,
-                    body: tryParseBodyAsJson(response)
-                } : null );
-        });
+            // send request and wait for its response
+            request(optionsToUse, function(error, response) {            
+                cb(error, response ? {
+                        status: response.statusCode,
+                        headers: response.headers,
+                        body: tryParseBodyAsJson(response)
+                    } : null );
+            });
+        }
     };
 
     var tryParseBodyAsJson = function (response) {

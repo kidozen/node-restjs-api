@@ -85,6 +85,7 @@ describe('Rest connector:', function(){
 
         server = http.createServer(function (req, res) {
             res.setHeader("x-foo", "bar");
+            res.setHeader("Content-Type", "text/baz");
             res.statusCode = 201;
             res.end();
         }).listen(9615);
@@ -94,6 +95,7 @@ describe('Rest connector:', function(){
             assert.ok(!err);
             assert.ok(result instanceof Stream);
             assert.equal("bar", result.headers["x-foo"]);
+            assert.equal("text/baz", result.headers["content-type"]);
             assert.equal(201, result.statusCode);
             done();            
         });
