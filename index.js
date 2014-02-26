@@ -93,6 +93,11 @@ module.exports = function(config){
         // set default headers
         optionsToUse.headers = merge(options.headers, self.config.headers);
 
+        var metadata = options._kidozen || options.metadata;
+        if (metadata && metadata.actAs) {
+            optionsToUse.headers.authorization = metadata.actAs;
+        };
+        
         // set required options
         optionsToUse.method = options.method || "GET";
         optionsToUse.url = self.config.endpoint + (options.path || "");
